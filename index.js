@@ -9,11 +9,15 @@ admin.initializeApp({
 });
 
 // 🔐 Firebase depuis GitHub secret
-admin.initializeApp({
-  credential: admin.credential.cert(
-    JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
-  ),
-});
+const admin = require("firebase-admin");
+
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(
+      JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
+    ),
+  });
+}
 
 sgMail.setApiKey(process.env.SENDGRID_KEY);
 
