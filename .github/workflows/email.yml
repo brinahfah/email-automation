@@ -1,0 +1,25 @@
+name: Daily Email Check
+
+on:
+  schedule:
+    - cron: "0 8 * * *" # chaque jour 8h
+  workflow_dispatch:
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - run: npm install
+        working-directory: email-automation
+
+      - run: node index.js
+        working-directory: email-automation
+        env:
+          SENDGRID_KEY: ${{ secrets.SENDGRID_KEY }}
