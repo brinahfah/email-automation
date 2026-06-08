@@ -1,8 +1,8 @@
-name: Daily Email Check
+name: Daily Email Automation
 
 on:
   schedule:
-    - cron: "0 8 * * *" # chaque jour 8h
+    - cron: "0 8 * * *"
   workflow_dispatch:
 
 jobs:
@@ -10,16 +10,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      - run: npm install
-        working-directory: email-automation
+      - name: Install dependencies
+        run: npm install
 
-      - run: node index.js
-        working-directory: email-automation
+      - name: Run script
+        run: node index.js
         env:
           SENDGRID_KEY: ${{ secrets.SENDGRID_KEY }}
+          SENDGRID_EMAIL: ${{ secrets.SENDGRID_EMAIL }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}

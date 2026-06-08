@@ -3,10 +3,16 @@ require("dotenv").config();
 const admin = require("firebase-admin");
 const sgMail = require("@sendgrid/mail");
 
-const serviceAccount = require("./serviceAccountKey.json");
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+  credential: admin.credential.applicationDefault(),
+});
+
+// 🔐 Firebase depuis GitHub secret
+admin.initializeApp({
+  credential: admin.credential.cert(
+    JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
+  ),
 });
 
 sgMail.setApiKey(process.env.SENDGRID_KEY);
