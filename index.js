@@ -3,14 +3,7 @@ require("dotenv").config();
 const admin = require("firebase-admin");
 const sgMail = require("@sendgrid/mail");
 
-
-admin.initializeApp({
-  credential: admin.credential.applicationDefault(),
-});
-
-// 🔐 Firebase depuis GitHub secret
-const admin = require("firebase-admin");
-
+// 🔐 Firebase init (UNE seule fois)
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(
