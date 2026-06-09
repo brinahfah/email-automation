@@ -3,7 +3,7 @@ require("dotenv").config();
 const admin = require("firebase-admin");
 const sgMail = require("@sendgrid/mail");
 
-// 🔐 Firebase init (UNE seule fois)
+// 🔐 Firebase init
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(
@@ -16,6 +16,7 @@ sgMail.setApiKey(process.env.SENDGRID_KEY);
 
 const db = admin.firestore();
 
+// 📧 ENVOI EMAIL
 async function sendEmail(to, subject, text) {
   await sgMail.send({
     to,
@@ -25,11 +26,13 @@ async function sendEmail(to, subject, text) {
   });
 }
 
+// ⏳ CALCUL DIFF JOURS
 function getDiffDays(date) {
   const today = new Date();
   return Math.floor((date - today) / (1000 * 60 * 60 * 24));
 }
 
+// 📌 MISSIONS + NOTIFICATIONS
 async function checkMissions() {
   const missionsSnap = await db.collection("missions").get();
 
@@ -41,8 +44,10 @@ async function checkMissions() {
     const date = data.dateButoir.toDate();
     const diff = getDiffDays(date);
 
+    console.log("Mission:", doc.id, "diff:", diff);
+
     // 🔔 J-7
-    if (diff <= 7 && diff >= 0) {
+    if (diff === 7) {
       await sendEmail(
         data.emailReferent,
         "📌 Rappel mission",
@@ -70,21 +75,27 @@ async function checkMissions() {
   }
 }
 
+// 🚀 MAIN UNIQUE
 async function main() {
   try {
+    console.log("🚀 Début script");
+
+    // TEST EMAIL (optionnel)
     await sendEmail(
       "ebikie4@gmail.com",
-      "Test GitHub Actions",
-      "Si tu reçois cet email, SendGrid fonctionne 🎉"
+      "Test SendGrid",
+      "Si tu reçois ça → OK 🎉"
     );
 
-    console.log("Email envoyé");
+    console.log("📧 Test email envoyé");
+
+    // LOGIQUE MISSIONS
+    await checkMissions();
+
+    console.log("✔ Vérification terminée");
   } catch (e) {
-    console.error(e);
+    console.error("❌ Erreur :", e);
   }
 }
-
-console.log("Envoi email vers :", "ton.adresse@gmail.com");
-console.log("Email envoyé avec succès");
 
 main();
