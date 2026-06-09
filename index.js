@@ -73,7 +73,7 @@ async function checkMissions() {
 async function main() {
   try {
     await sendEmail(
-      "TON_EMAIL_ICI",
+      "ebikie4@gmail.com",
       "Test GitHub Actions",
       "Si tu reçois cet email, SendGrid fonctionne 🎉"
     );
