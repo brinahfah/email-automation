@@ -42,7 +42,7 @@ async function checkMissions() {
     const diff = getDiffDays(date);
 
     // 🔔 J-7
-    if (diff === 7) {
+    if (diff <= 7 && diff >= 0) {
       await sendEmail(
         data.emailReferent,
         "📌 Rappel mission",
@@ -71,8 +71,17 @@ async function checkMissions() {
 }
 
 async function main() {
-  await checkMissions();
-  console.log("✔ Vérification terminée");
+  try {
+    await sendEmail(
+      "TON_EMAIL_ICI",
+      "Test GitHub Actions",
+      "Si tu reçois cet email, SendGrid fonctionne 🎉"
+    );
+
+    console.log("Email envoyé");
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 main();
