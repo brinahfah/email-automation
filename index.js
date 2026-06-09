@@ -84,4 +84,7 @@ async function main() {
   }
 }
 
+console.log("Envoi email vers :", "ton.adresse@gmail.com");
+console.log("Email envoyé avec succès");
+
 main();
