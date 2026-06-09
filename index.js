@@ -34,44 +34,21 @@ function getDiffDays(date) {
 
 // 📌 MISSIONS + NOTIFICATIONS
 async function checkMissions() {
+  const referentSnap = await db.collection("referents").limit(1).get();
+  const emailReferent = referentSnap.docs[0].data().email_referent;
+
   const missionsSnap = await db.collection("missions").get();
 
   for (const doc of missionsSnap.docs) {
     const data = doc.data();
 
-    if (!data.dateButoir || !data.emailReferent) continue;
+    console.log("Mission :", data.numero);
 
-    const date = data.dateButoir.toDate();
-    const diff = getDiffDays(date);
-
-    console.log("Mission:", doc.id, "diff:", diff);
-
-    // 🔔 J-7
-    if (diff === 7) {
-      await sendEmail(
-        data.emailReferent,
-        "📌 Rappel mission",
-        "Mission à compléter dans 7 jours"
-      );
-    }
-
-    // ⚠️ Jour J
-    if (diff === 0 && data.statut !== "Complété") {
-      await sendEmail(
-        data.emailReferent,
-        "⚠️ Mission à compléter",
-        "C’est aujourd’hui !"
-      );
-    }
-
-    // 🔥 J+7
-    if (diff === -7 && data.statut !== "Complété") {
-      await sendEmail(
-        data.emailReferent,
-        "🔥 Mission en retard",
-        "Mission toujours non complétée"
-      );
-    }
+    await sendEmail(
+      emailReferent,
+      "TEST MISSION",
+      `Mission numéro ${data.numero}`
+    );
   }
 }
 
