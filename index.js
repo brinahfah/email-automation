@@ -3,7 +3,7 @@ require("dotenv").config();
 const admin = require("firebase-admin");
 const sgMail = require("@sendgrid/mail");
 
-// 🔐 Firebase init
+// Firebase init
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(
@@ -16,62 +16,90 @@ sgMail.setApiKey(process.env.SENDGRID_KEY);
 
 const db = admin.firestore();
 
-// 📧 ENVOI EMAIL
 async function sendEmail(to, subject, text) {
-  try {
-    console.log("📨 Envoi email vers :", to);
-
-    const result = await sgMail.send({
-      to,
-      from: process.env.SENDGRID_EMAIL,
-      subject,
-      text,
-    });
-
-    console.log("✅ Email envoyé :", result[0].statusCode);
-  } catch (err) {
-    console.error("❌ ERREUR SENDGRID :", err.response?.body || err);
-  }
+  await sgMail.send({
+    to,
+    from: process.env.SENDGRID_EMAIL,
+    subject,
+    text,
+  });
 }
 
-// ⏳ CALCUL DIFF JOURS
+// différence en jours
 function getDiffDays(date) {
-  const today = new Date();
-  return Math.floor((date - today) / (1000 * 60 * 60 * 24));
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+  return Math.floor((target - today) / (1000 * 60 * 60 * 24));
 }
 
-// 📌 MISSIONS + NOTIFICATIONS
-async function checkMissions() {
-  const referentSnap = await db.collection("referents").limit(1).get();
-  const emailReferent = referentSnap.docs[0].data().email_referent;
+async function getReferentEmail() {
+  const snap = await db.collection("referents").limit(1).get();
+  return snap.docs[0].data().email_referent;
+}
 
-  const missionsSnap = await db.collection("missions").get();
+async function checkDeadlines() {
+  const emailReferent = await getReferentEmail();
 
-  for (const doc of missionsSnap.docs) {
+  const snap = await db.collection("deadlines").get();
+
+  for (const doc of snap.docs) {
     const data = doc.data();
 
-    console.log("Mission :", data.numero);
+    const date = data.dateEcheance.toDate();
+    const diff = getDiffDays(date);
 
-    await sendEmail(
-      emailReferent,
-      "TEST MISSION",
-      `Mission numéro ${data.numero}`
-    );
+    const ref = doc.ref;
+    const notif = data.notificationsEnvoyees || {};
+
+    // 🔵 J-7
+    if (diff === 7 && !notif.j7) {
+      await sendEmail(
+        emailReferent,
+        "📌 Rappel échéance",
+        `Mission/RDV ${data.numero} dans 1 semaine`
+      );
+
+      await ref.update({
+        "notificationsEnvoyees.j7": true,
+      });
+    }
+
+    // 🔴 Jour J
+    if (diff === 0 && !notif.j0) {
+      await sendEmail(
+        emailReferent,
+        "⚠️ Échéance aujourd’hui",
+        `Mission/RDV ${data.numero} à faire aujourd’hui`
+      );
+
+      await ref.update({
+        "notificationsEnvoyees.j0": true,
+      });
+    }
+
+    // 🔥 J+7
+    if (diff === -7 && !notif.jm7) {
+      await sendEmail(
+        emailReferent,
+        "🔥 Échéance en retard",
+        `Mission/RDV ${data.numero} non complété`
+      );
+
+      await ref.update({
+        "notificationsEnvoyees.jm7": true,
+      });
+    }
   }
 }
 
-// 🚀 MAIN UNIQUE
 async function main() {
   try {
-    await sendEmail(
-      "ebikie4@gmail.com",
-      "Test GitHub + SendGrid",
-      "🎉 Félicitations ! Si tu lis cet email, GitHub Actions et SendGrid fonctionnent."
-    );
-
-    console.log("Email envoyé avec succès !");
-  } catch (error) {
-    console.error("Erreur lors de l'envoi :", error);
+    await checkDeadlines();
+    console.log("✔ Vérification deadlines terminée");
+  } catch (e) {
+    console.error("❌ Erreur script :", e);
   }
 }
 
