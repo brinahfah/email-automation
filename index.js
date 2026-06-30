@@ -18,6 +18,11 @@ sgMail.setApiKey(process.env.SENDGRID_KEY);
 const db = admin.firestore();
 
 async function sendEmail(to, subject, text) {
+  if (!to) {
+    console.error("❌ EMAIL DESTINATAIRE VIDE !");
+    return;
+  }
+
   await sgMail.send({
     to,
     from: process.env.SENDGRID_EMAIL,
@@ -47,7 +52,18 @@ function getDiffDays(date) {
 
 async function getReferentEmail() {
   const snap = await db.collection("referent").limit(1).get();
-  return snap.docs[0].data().email_referent;
+
+  console.log("📦 referent docs:", snap.size);
+
+  if (snap.empty) {
+    throw new Error("Aucun référent trouvé");
+  }
+
+  const data = snap.docs[0].data();
+
+  console.log("📧 referent data:", data);
+
+  return data.email_referent;
 }
 
 async function checkDeadlines() {
