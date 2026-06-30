@@ -93,7 +93,7 @@ async function checkDeadlines() {
    }
 
     // 🔴 Jour J
-    if (ddiff === 0 && !notif.j0) {
+    if (diff === 0 && !notif.j0) {
       await sendEmail(
         emailReferent,
         "⚠️ Échéance aujourd’hui",
