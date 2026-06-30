@@ -1,3 +1,4 @@
+process.env.TZ = "UTC";
 require("dotenv").config();
 
 const admin = require("firebase-admin");
@@ -29,17 +30,17 @@ async function sendEmail(to, subject, text) {
 function getDiffDays(date) {
   const now = new Date();
 
-  const today = new Date(
+  const today = new Date(Date.UTC(
     now.getFullYear(),
     now.getMonth(),
     now.getDate()
-  ).getTime();
+  ));
 
-  const target = new Date(
+  const target = new Date(Date.UTC(
     date.getFullYear(),
     date.getMonth(),
     date.getDate()
-  ).getTime();
+  ));
 
   return Math.round((target - today) / (1000 * 60 * 60 * 24));
 }
