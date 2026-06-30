@@ -49,6 +49,8 @@ async function checkDeadlines() {
 
     const date = data.dateEcheance.toDate();
     const diff = getDiffDays(date);
+    console.log("📅 Deadline :", data.numero, date);
+    console.log("📊 Diff jours :", diff);
 
     const ref = doc.ref;
     const notif = data.notificationsEnvoyees || {};
