@@ -29,19 +29,19 @@ async function sendEmail(to, subject, text) {
 function getDiffDays(date) {
   const now = new Date();
 
-  const todayUTC = Date.UTC(
+  const today = new Date(
     now.getFullYear(),
     now.getMonth(),
     now.getDate()
-  );
+  ).getTime();
 
-  const targetUTC = Date.UTC(
-    date.getUTCFullYear(),
-    date.getUTCMonth(),
-    date.getUTCDate()
-  );
+  const target = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate()
+  ).getTime();
 
-  return Math.round((targetUTC - todayUTC) / (1000 * 60 * 60 * 24));
+  return Math.round((target - today) / (1000 * 60 * 60 * 24));
 }
 
 async function getReferentEmail() {
@@ -61,6 +61,9 @@ async function checkDeadlines() {
     const diff = getDiffDays(date);
     console.log("📅 Deadline :", data.numero, date);
     console.log("📊 Diff jours :", diff);
+    console.log("RAW Firestore timestamp:", data.dateEcheance);
+    console.log("JS Date:", data.dateEcheance.toDate());
+    console.log("ISO:", data.dateEcheance.toDate().toISOString());
 
     const ref = doc.ref;
     const notif = data.notificationsEnvoyees || {};
