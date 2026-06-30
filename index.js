@@ -63,7 +63,7 @@ async function getReferentEmail() {
 
   console.log("📧 referent data:", data);
 
-  return data.email_referent;
+  return data.email;
 }
 
 async function checkDeadlines() {
