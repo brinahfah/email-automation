@@ -70,7 +70,7 @@ async function checkDeadlines() {
     const notif = data.notificationsEnvoyees || {};
 
     // 🔵 J-7
-    if (diff === 7 && !notif.j7) {
+    if (diff <= 7 && diff > 5) {
       await sendEmail(
         emailReferent,
         "📌 Rappel échéance",
@@ -83,7 +83,7 @@ async function checkDeadlines() {
     }
 
     // 🔴 Jour J
-    if (diff === 0 && !notif.j0) {
+    if (diff <= 0 && diff > -1) {
       await sendEmail(
         emailReferent,
         "⚠️ Échéance aujourd’hui",
@@ -96,7 +96,7 @@ async function checkDeadlines() {
     }
 
     // 🔥 J+7
-    if (diff === -7 && !notif.jm7) {
+    if (diff <= -7 && diff > -8) {
       await sendEmail(
         emailReferent,
         "🔥 Échéance en retard",
