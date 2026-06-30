@@ -81,7 +81,7 @@ async function checkDeadlines() {
     const alreadySent = (key) => sent[key] === true;
 
     // 🔵 J-7
-   if (diff === 7 && !alreadySent("j7")) {
+   if (diff >= 0 && diff <= 7 && !alreadySent("j7")) {
      await sendEmail(
        emailReferent,
        "📌 Rappel échéance",
@@ -135,6 +135,8 @@ async function main() {
   try {
     await checkDeadlines();
     console.log("✔ Vérification deadlines terminée");
+    console.log("📅 deadline :", data.numero, date.toISOString());
+    console.log("📊 diff :", diff);
   } catch (e) {
     console.error("❌ Erreur script :", e);
   }
