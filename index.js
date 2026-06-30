@@ -77,45 +77,56 @@ async function checkDeadlines() {
     const date = data.dateEcheance.toDate();
     const diff = getDiffDays(date);
     const ref = doc.ref;
-    const notif = data.notificationsEnvoyees || {};
+    const sent = data.notificationsEnvoyees || {};
+    const alreadySent = (key) => sent[key] === true;
 
     // 🔵 J-7
-   if (diff === 7 && !notif.j7) {
+   if (diff === 7 && !alreadySent("j7")) {
      await sendEmail(
        emailReferent,
        "📌 Rappel échéance",
        `Mission/RDV ${data.numero} dans environ 1 semaine`
      );
 
-     await ref.update({
-       "notificationsEnvoyees.j7": true,
-     });
+     await ref.set({
+         notificationsEnvoyees: {
+           ...sent,
+           j7: true
+         }
+       }, { merge: true });
    }
 
     // 🔴 Jour J
-    if (diff === 0 && !notif.j0) {
+    if (diff === 0 && !alreadySent("j0")) {
       await sendEmail(
         emailReferent,
         "⚠️ Échéance aujourd’hui",
         `Mission/RDV ${data.numero} à faire aujourd’hui`
       );
 
-      await ref.update({
-        "notificationsEnvoyees.j0": true,
-      });
+       await ref.set({
+          notificationsEnvoyees: {
+            ...sent,
+            j0: true
+          }
+        }, { merge: true });
     }
 
     // 🔥 J+7
-    if (diff === -7 && !notif.jm7) {
+    if (diff === -7 && !alreadySent("jm7")) {
       await sendEmail(
         emailReferent,
         "🔥 Échéance en retard",
         `Mission/RDV ${data.numero} non complété depuis 1 semaine`
       );
 
-      await ref.update({
-        "notificationsEnvoyees.jm7": true,
-      });
+        await ref.set({
+          notificationsEnvoyees: {
+            ...sent,
+            jm7: true
+          }
+        }, { merge: true });
+
     }
   }
 }
