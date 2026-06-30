@@ -29,19 +29,21 @@ async function sendEmail(to, subject, text) {
 function getDiffDays(date) {
   const now = new Date();
 
-  const todayUTC = Date.UTC(
+  const today = new Date(
     now.getFullYear(),
     now.getMonth(),
     now.getDate()
   );
 
-  const targetUTC = Date.UTC(
+  const target = new Date(
     date.getFullYear(),
     date.getMonth(),
     date.getDate()
   );
 
-  return Math.round((targetUTC - todayUTC) / (1000 * 60 * 60 * 24));
+  const diffTime = target.getTime() - today.getTime();
+
+  return Math.floor(diffTime / (1000 * 60 * 60 * 24));
 }
 
 async function getReferentEmail() {
