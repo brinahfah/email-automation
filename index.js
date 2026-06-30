@@ -60,30 +60,26 @@ async function checkDeadlines() {
 
     const date = data.dateEcheance.toDate();
     const diff = getDiffDays(date);
-    console.log("📅 Deadline :", data.numero, date);
-    console.log("📊 Diff jours :", diff);
-    console.log("RAW Firestore timestamp:", data.dateEcheance);
-    console.log("JS Date:", data.dateEcheance.toDate());
-    console.log("ISO:", data.dateEcheance.toDate().toISOString());
-
+    console.log("🧠 Diff brut :", diff);
+    console.log("📌 Fenêtre J-7 :", diff <= 7 && diff >= 5);
     const ref = doc.ref;
     const notif = data.notificationsEnvoyees || {};
 
     // 🔵 J-7
-    if (diff <= 7 && diff > 5) {
-      await sendEmail(
-        emailReferent,
-        "📌 Rappel échéance",
-        `Mission/RDV ${data.numero} dans 1 semaine`
-      );
+   if (diff <= 7 && diff >= 5 && !notif.j7) {
+     await sendEmail(
+       emailReferent,
+       "📌 Rappel échéance",
+       `Mission/RDV ${data.numero} dans environ 1 semaine`
+     );
 
-      await ref.update({
-        "notificationsEnvoyees.j7": true,
-      });
-    }
+     await ref.update({
+       "notificationsEnvoyees.j7": true,
+     });
+   }
 
     // 🔴 Jour J
-    if (diff <= 0 && diff > -1) {
+    if (diff <= 0 && diff >= -1 && !notif.j0) {
       await sendEmail(
         emailReferent,
         "⚠️ Échéance aujourd’hui",
@@ -96,11 +92,11 @@ async function checkDeadlines() {
     }
 
     // 🔥 J+7
-    if (diff <= -7 && diff > -8) {
+    if (diff <= -7 && diff >= -8 && !notif.jm7) {
       await sendEmail(
         emailReferent,
         "🔥 Échéance en retard",
-        `Mission/RDV ${data.numero} non complété`
+        `Mission/RDV ${data.numero} non complété depuis 1 semaine`
       );
 
       await ref.update({
