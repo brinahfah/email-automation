@@ -35,7 +35,7 @@ function getDiffDays(date) {
 }
 
 async function getReferentEmail() {
-  const snap = await db.collection("referents").limit(1).get();
+  const snap = await db.collection("referent").limit(1).get();
   return snap.docs[0].data().email_referent;
 }
 
