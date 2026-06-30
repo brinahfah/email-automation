@@ -18,12 +18,20 @@ const db = admin.firestore();
 
 // 📧 ENVOI EMAIL
 async function sendEmail(to, subject, text) {
-  await sgMail.send({
-    to,
-    from: process.env.SENDGRID_EMAIL,
-    subject,
-    text,
-  });
+  try {
+    console.log("📨 Envoi email vers :", to);
+
+    const result = await sgMail.send({
+      to,
+      from: process.env.SENDGRID_EMAIL,
+      subject,
+      text,
+    });
+
+    console.log("✅ Email envoyé :", result[0].statusCode);
+  } catch (err) {
+    console.error("❌ ERREUR SENDGRID :", err.response?.body || err);
+  }
 }
 
 // ⏳ CALCUL DIFF JOURS
@@ -55,23 +63,15 @@ async function checkMissions() {
 // 🚀 MAIN UNIQUE
 async function main() {
   try {
-    console.log("🚀 Début script");
-
-    // TEST EMAIL (optionnel)
     await sendEmail(
       "ebikie4@gmail.com",
-      "Test SendGrid",
-      "Si tu reçois ça → OK 🎉"
+      "Test GitHub + SendGrid",
+      "🎉 Félicitations ! Si tu lis cet email, GitHub Actions et SendGrid fonctionnent."
     );
 
-    console.log("📧 Test email envoyé");
-
-    // LOGIQUE MISSIONS
-    await checkMissions();
-
-    console.log("✔ Vérification terminée");
-  } catch (e) {
-    console.error("❌ Erreur :", e);
+    console.log("Email envoyé avec succès !");
+  } catch (error) {
+    console.error("Erreur lors de l'envoi :", error);
   }
 }
 
